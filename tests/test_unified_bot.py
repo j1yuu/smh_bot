@@ -7,11 +7,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from unified_bot.agent import Agent
-from unified_bot.config import Config
-from unified_bot.models import ToolExecutionResult
-from unified_bot.parser_service import ParserService
-from unified_bot.tools import CurrentTimeTool, ParseFileTool, ToolRegistry
+from app.agent import Agent
+from app.config import Config
+from app.models import ToolExecutionResult
+from app.parser_service import ParserService
+from app.tools import CurrentTimeTool, ParseFileTool, ToolRegistry
 
 
 class ParserServiceTests(unittest.TestCase):
