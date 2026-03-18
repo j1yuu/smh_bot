@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+import os
+
+os.environ.pop("ALL_PROXY", None)
+os.environ.pop("all_proxy", None)
 
 CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
