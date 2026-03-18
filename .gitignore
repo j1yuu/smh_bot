@@ -1,0 +1,6 @@
+.env
+.env.dev
+.env.stage
+.env.prod
+
+.venv
