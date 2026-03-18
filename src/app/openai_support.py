@@ -17,7 +17,7 @@ class OpenAIClientFactory:
     def create(config: Config) -> OpenAI:
         from openai import OpenAI
 
-        return OpenAI(base_url="https://openrouter.ai/api/v1", api_key=config.openai_api_key, timeout=config.request_timeout_seconds)
+        return OpenAI(api_key=config.openai_api_key, timeout=config.request_timeout_seconds)
 
 
 def with_retries(

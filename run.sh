@@ -33,4 +33,4 @@ if [[ ! -f "${PROJECT_ROOT}/.env" && -f "${PROJECT_ROOT}/.env.example" ]]; then
   echo "[setup] Создан .env из .env.example. Добавьте OPENAI_API_KEY перед первым запуском."
 fi
 
-exec python "${PROJECT_ROOT}/main.py" "$@"
+exec python "${PROJECT_ROOT}/main.py" chat "$@"
