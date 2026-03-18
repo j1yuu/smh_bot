@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from .config import Config
 from .openai_support import with_retries
@@ -8,8 +8,11 @@ from .tools import ToolRegistry
 
 if TYPE_CHECKING:
     from openai import OpenAI
+    from openai.types.chat import ChatCompletionMessageParam
+else:
+    ChatCompletionMessageParam = Any
 
-Message = dict[str, Any]
+Message = ChatCompletionMessageParam
 
 
 class Agent:
@@ -20,7 +23,7 @@ class Agent:
         self._config = config
         self._tools = tools
         self._messages: list[Message] = [
-            {"role": "system", "content": self._config.system_prompt},
+            cast(Message, {"role": "system", "content": self._config.system_prompt}),
         ]
 
     def run_interactive(self) -> None:
@@ -34,7 +37,7 @@ class Agent:
             print(f"Бот: {answer}")
 
     def respond(self, user_text: str) -> str:
-        self._messages.append({"role": "user", "content": user_text})
+        self._messages.append(cast(Message, {"role": "user", "content": user_text}))
         return self._complete_with_tools()
 
     def _complete_with_tools(self) -> str:
@@ -47,21 +50,24 @@ class Agent:
 
         if assistant_message.tool_calls:
             self._messages.append(
-                {
-                    "role": "assistant",
-                    "content": assistant_message.content or "",
-                    "tool_calls": [
-                        {
-                            "id": tool_call.id,
-                            "type": "function",
-                            "function": {
-                                "name": tool_call.function.name,
-                                "arguments": tool_call.function.arguments,
-                            },
-                        }
-                        for tool_call in assistant_message.tool_calls
-                    ],
-                }
+                cast(
+                    Message,
+                    {
+                        "role": "assistant",
+                        "content": assistant_message.content or "",
+                        "tool_calls": [
+                            {
+                                "id": tool_call.id,
+                                "type": "function",
+                                "function": {
+                                    "name": tool_call.function.name,
+                                    "arguments": tool_call.function.arguments,
+                                },
+                            }
+                            for tool_call in assistant_message.tool_calls
+                        ],
+                    },
+                )
             )
 
             for tool_call in assistant_message.tool_calls:
@@ -74,11 +80,14 @@ class Agent:
                     result = self._tools.error_result(tool_call.function.name, error)
 
                 self._messages.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "content": self._tools.serialize_result(result),
-                    }
+                    cast(
+                        Message,
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": self._tools.serialize_result(result),
+                        },
+                    )
                 )
 
             follow_up = with_retries(
@@ -87,11 +96,11 @@ class Agent:
                 retry_delay_seconds=self._config.retry_delay_seconds,
             )
             final_text = follow_up.choices[0].message.content or "Без ответа"
-            self._messages.append({"role": "assistant", "content": final_text})
+            self._messages.append(cast(Message, {"role": "assistant", "content": final_text}))
             return final_text
 
         final_text = assistant_message.content or "Без ответа"
-        self._messages.append({"role": "assistant", "content": final_text})
+        self._messages.append(cast(Message, {"role": "assistant", "content": final_text}))
         return final_text
 
     def _create_completion(self) -> Any:
