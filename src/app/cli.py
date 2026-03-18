@@ -36,7 +36,7 @@ def create_services() -> tuple[Config, ParserService, ToolRegistry, Agent]:
     return config, parser_service, tools, agent
 
 
-def run_chat() -> int:
+def run_chat(_args: argparse.Namespace) -> int:
     _, _, _, agent = create_services()
     agent.run_interactive()
     return 0
