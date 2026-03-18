@@ -4,8 +4,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_CHAT_MODEL = "gpt-4.1-mini"
-DEFAULT_PARSER_MODEL = "gpt-4.1"
+DEFAULT_CHAT_MODEL = "openai/gpt-oss-120b:free"
+DEFAULT_PARSER_MODEL = "openai/gpt-oss-120b:free"
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 60.0
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY_SECONDS = 1.0
