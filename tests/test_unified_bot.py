@@ -50,11 +50,25 @@ class ConfigTests(unittest.TestCase):
             with patch.dict('os.environ', {}, clear=True):
                 config = Config.from_env(env_path)
 
-            self.assertEqual(config.chat_model, 'gpt-4.1-mini')
-            self.assertEqual(config.parser_model, 'gpt-4.1')
+            self.assertEqual(config.chat_model, 'openai/gpt-4.1-nano')
+            self.assertEqual(config.parser_model, 'openai/gpt-4.1-nano')
             self.assertIsInstance(config.request_timeout_seconds, float)
             self.assertEqual(config.max_retries, 3)
 
+
+class ConfigTokenLimitTests(unittest.TestCase):
+    def test_from_env_allows_overriding_chat_max_tokens(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            env_path = Path(tmp_dir) / 'test.env'
+            env_path.write_text(
+                'OPENAI_API_KEY=test-key\nOPENAI_CHAT_MAX_TOKENS=512\n',
+                encoding='utf-8',
+            )
+
+            with patch.dict('os.environ', {}, clear=True):
+                config = Config.from_env(env_path)
+
+            self.assertEqual(config.chat_max_tokens, 512)
 
 
 class AgentTests(unittest.TestCase):
@@ -109,6 +123,9 @@ class AgentTests(unittest.TestCase):
 
         self.assertIn('2026-01-01', answer)
         self.assertEqual(mock_client.chat.completions.create.call_count, 2)
+        first_call_kwargs = mock_client.chat.completions.create.call_args_list[0].kwargs
+        self.assertEqual(first_call_kwargs['max_tokens'], 2048)
+
 
 
 class ParseFileToolTests(unittest.TestCase):

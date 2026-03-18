@@ -108,5 +108,6 @@ class Agent:
             model=self._config.chat_model,
             messages=self._messages,
             tools=self._tools.definitions,
+            max_tokens=self._config.chat_max_tokens,
             tool_choice="auto",
         )

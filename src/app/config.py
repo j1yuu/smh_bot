@@ -4,9 +4,10 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_CHAT_MODEL = "openai/gpt-oss-120b:free"
-DEFAULT_PARSER_MODEL = "openai/gpt-oss-120b:free"
+DEFAULT_CHAT_MODEL = "openai/gpt-4.1-nano"
+DEFAULT_PARSER_MODEL = "openai/gpt-4.1-nano"
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 60.0
+DEFAULT_CHAT_MAX_TOKENS = 20000
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY_SECONDS = 1.0
 DEFAULT_SYSTEM_PROMPT = (
@@ -33,6 +34,7 @@ class Config:
     chat_model: str = DEFAULT_CHAT_MODEL
     parser_model: str = DEFAULT_PARSER_MODEL
     request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT_SECONDS
+    chat_max_tokens: int = DEFAULT_CHAT_MAX_TOKENS
     max_retries: int = DEFAULT_MAX_RETRIES
     retry_delay_seconds: float = DEFAULT_RETRY_DELAY_SECONDS
     system_prompt: str = DEFAULT_SYSTEM_PROMPT
@@ -57,6 +59,10 @@ class Config:
                     "OPENAI_REQUEST_TIMEOUT_SECONDS",
                     str(DEFAULT_REQUEST_TIMEOUT_SECONDS),
                 )
+            ),
+            chat_max_tokens=max(
+                1,
+                int(os.getenv("OPENAI_CHAT_MAX_TOKENS", str(DEFAULT_CHAT_MAX_TOKENS))),
             ),
             max_retries=int(os.getenv("OPENAI_MAX_RETRIES", str(DEFAULT_MAX_RETRIES))),
             retry_delay_seconds=float(
