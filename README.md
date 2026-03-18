@@ -15,25 +15,27 @@
 - `ParserService` — сервис парсинга текста и файлов через OpenAI Responses API;
 - `ToolRegistry`, `CurrentTimeTool`, `ParseFileTool` — набор инструментов, доступных агенту;
 - `Agent` — чат-агент, который управляет диалогом и вызовами инструментов;
-- `cli.py` — единая CLI-точка входа.
+- `main.py` — удобная точка входа из корня проекта;
+- `src/app/cli.py` — реализация общей CLI.
 
 ## Структура проекта
 
 ```text
-src/
-  chat-bot.py          # обратная совместимость: запуск чата
-  parser.py            # обратная совместимость: запуск parse-команды
-  unified_bot/
-    agent.py
-    cli.py
-    config.py
-    models.py
-    openai_support.py
-    parser_service.py
-    schemas.py
-    tools.py
-tests/
-  test_unified_bot.py
+.
+├── main.py
+├── src/
+│   ├── main.py
+│   └── app/
+│       ├── agent.py
+│       ├── cli.py
+│       ├── config.py
+│       ├── models.py
+│       ├── openai_support.py
+│       ├── parser_service.py
+│       ├── schemas.py
+│       └── tools.py
+└── tests/
+    └── test_unified_bot.py
 ```
 
 ## Требования
@@ -41,7 +43,7 @@ tests/
 - Python 3.10+
 - Установленные пакеты:
   - `openai`
-  
+
 Пример установки:
 
 ```bash
@@ -74,26 +76,28 @@ OPENAI_RETRY_DELAY_SECONDS=1
 
 ### 1. Интерактивный чат
 
+Самый удобный вариант:
+
 ```bash
-python src/chat-bot.py
+python main.py chat
 ```
 
-или через общую CLI:
+Также можно запускать так:
 
 ```bash
-PYTHONPATH=src python -m unified_bot.cli chat
+python src/main.py chat
 ```
 
 ### 2. Разовый парсинг файла
 
 ```bash
-python src/parser.py data/input.txt data/output.json
+python main.py parse data/input.txt data/output.json
 ```
 
 или:
 
 ```bash
-PYTHONPATH=src python -m unified_bot.cli parse data/input.txt data/output.json
+python src/main.py parse data/input.txt data/output.json
 ```
 
 ## Пример диалога
@@ -119,6 +123,14 @@ PYTHONPATH=src python -m unified_bot.cli parse data/input.txt data/output.json
 
 ## Тесты
 
+Тесты настроены так, чтобы их можно было запускать прямо из корня проекта без ручной настройки `PYTHONPATH`:
+
 ```bash
-PYTHONPATH=src python -m unittest discover -s tests
+python -m unittest discover -s tests
+```
+
+При желании можно запустить и отдельный файл:
+
+```bash
+python -m unittest tests/test_unified_bot.py
 ```
