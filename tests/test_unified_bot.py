@@ -41,6 +41,22 @@ class ParserServiceTests(unittest.TestCase):
             self.assertTrue(output_path.exists())
 
 
+class ConfigTests(unittest.TestCase):
+    def test_from_env_uses_string_defaults_instead_of_slot_descriptors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            env_path = Path(tmp_dir) / 'test.env'
+            env_path.write_text('OPENAI_API_KEY=test-key\n', encoding='utf-8')
+
+            with patch.dict('os.environ', {}, clear=True):
+                config = Config.from_env(env_path)
+
+            self.assertEqual(config.chat_model, 'gpt-4.1-mini')
+            self.assertEqual(config.parser_model, 'gpt-4.1')
+            self.assertIsInstance(config.request_timeout_seconds, float)
+            self.assertEqual(config.max_retries, 3)
+
+
+
 class AgentTests(unittest.TestCase):
     def test_agent_executes_tool_and_returns_follow_up_text(self) -> None:
         config = Config(openai_api_key='test')

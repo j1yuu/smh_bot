@@ -3,16 +3,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from json import JSONDecodeError, dumps, loads
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from .models import ToolExecutionResult
 from .parser_service import ParserService
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionToolUnionParam
+else:
+    ChatCompletionToolUnionParam = dict[str, Any]
+
+ToolDefinition = ChatCompletionToolUnionParam
 
 
 class Tool(Protocol):
     name: str
 
-    def definition(self) -> dict[str, Any]: ...
+    def definition(self) -> ToolDefinition: ...
 
     def execute(self, arguments_json: str) -> ToolExecutionResult: ...
 
@@ -21,20 +28,23 @@ class Tool(Protocol):
 class CurrentTimeTool:
     name: str = "get_current_time"
 
-    def definition(self) -> dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": self.name,
-                "description": "Возвращает текущее UTC-время в формате YYYY-MM-DD HH:MM:SS",
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                    "additionalProperties": False,
+    def definition(self) -> ToolDefinition:
+        return cast(
+            ToolDefinition,
+            {
+                "type": "function",
+                "function": {
+                    "name": self.name,
+                    "description": "Возвращает текущее UTC-время в формате YYYY-MM-DD HH:MM:SS",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": False,
+                    },
                 },
             },
-        }
+        )
 
     def execute(self, arguments_json: str) -> ToolExecutionResult:
         _ = arguments_json
@@ -50,32 +60,35 @@ class ParseFileTool:
     parser_service: ParserService
     name: str = "parse_file_to_json"
 
-    def definition(self) -> dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": self.name,
-                "description": (
-                    "Читает текстовый файл, отправляет его в OpenAI для парсинга "
-                    "и сохраняет результат в JSON-файл."
-                ),
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "input_path": {
-                            "type": "string",
-                            "description": "Относительный или абсолютный путь к входному текстовому файлу.",
+    def definition(self) -> ToolDefinition:
+        return cast(
+            ToolDefinition,
+            {
+                "type": "function",
+                "function": {
+                    "name": self.name,
+                    "description": (
+                        "Читает текстовый файл, отправляет его в OpenAI для парсинга "
+                        "и сохраняет результат в JSON-файл."
+                    ),
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "input_path": {
+                                "type": "string",
+                                "description": "Относительный или абсолютный путь к входному текстовому файлу.",
+                            },
+                            "output_path": {
+                                "type": "string",
+                                "description": "Относительный или абсолютный путь к выходному JSON-файлу.",
+                            },
                         },
-                        "output_path": {
-                            "type": "string",
-                            "description": "Относительный или абсолютный путь к выходному JSON-файлу.",
-                        },
+                        "required": ["input_path", "output_path"],
+                        "additionalProperties": False,
                     },
-                    "required": ["input_path", "output_path"],
-                    "additionalProperties": False,
                 },
             },
-        }
+        )
 
     def execute(self, arguments_json: str) -> ToolExecutionResult:
         try:
@@ -105,7 +118,7 @@ class ToolRegistry:
         self._tools = {tool.name: tool for tool in tools}
 
     @property
-    def definitions(self) -> list[dict[str, Any]]:
+    def definitions(self) -> list[ToolDefinition]:
         return [tool.definition() for tool in self._tools.values()]
 
     def execute(self, name: str, arguments_json: str) -> ToolExecutionResult:
