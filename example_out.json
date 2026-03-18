@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "title": "Молоко",
+      "quantity": "2 литра",
+      "price": "unknown"
+    },
+    {
+      "title": "Хлеб батон",
+      "quantity": "unknown",
+      "price": "55 руб"
+    },
+    {
+      "title": "Яблоки",
+      "quantity": "1 кг",
+      "price": "120 руб"
+    },
+    {
+      "title": "Сыр",
+      "quantity": "unknown",
+      "price": "unknown"
+    },
+    {
+      "title": "Яйца",
+      "quantity": "10 шт",
+      "price": "unknown"
+    }
+  ]
+}
