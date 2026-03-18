@@ -20,10 +20,10 @@
 ## Структура проекта
 
 ```text
+main.py
 src/
-  chat-bot.py          # обратная совместимость: запуск чата
-  parser.py            # обратная совместимость: запуск parse-команды
-  unified_bot/
+  main.py              # запуск приложения через src-совместимый entrypoint
+  app/
     agent.py
     cli.py
     config.py
@@ -33,6 +33,8 @@ src/
     schemas.py
     tools.py
 tests/
+  conftest.py          # автоматически добавляет src/ в sys.path для pytest
+  test_main.py
   test_unified_bot.py
 ```
 
@@ -75,25 +77,25 @@ OPENAI_RETRY_DELAY_SECONDS=1
 ### 1. Интерактивный чат
 
 ```bash
-python src/chat-bot.py
+python main.py chat
 ```
 
-или через общую CLI:
+или через src-совместимый entrypoint:
 
 ```bash
-PYTHONPATH=src python -m unified_bot.cli chat
+python src/main.py chat
 ```
 
 ### 2. Разовый парсинг файла
 
 ```bash
-python src/parser.py data/input.txt data/output.json
+python main.py parse data/input.txt data/output.json
 ```
 
 или:
 
 ```bash
-PYTHONPATH=src python -m unified_bot.cli parse data/input.txt data/output.json
+python src/main.py parse data/input.txt data/output.json
 ```
 
 ## Пример диалога
@@ -118,6 +120,12 @@ PYTHONPATH=src python -m unified_bot.cli parse data/input.txt data/output.json
 - строгая JSON-схема для результата парсинга.
 
 ## Тесты
+
+```bash
+pytest
+```
+
+Если нужен встроенный раннер `unittest`, он тоже продолжает работать:
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests
